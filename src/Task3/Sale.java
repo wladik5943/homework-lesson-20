@@ -1,75 +1,61 @@
 package Task3;
 
 import java.util.Optional;
-import java.util.Random;
 
-public class Shop implements Runnable{
-
-    private int product = 0;
-
-    public Shop(Optional<Manufacturer> manufacture) {
-        this.manufacture = manufacture;
-    }
-
-    public Shop(Byyer byyer) {
-        this.byyer = byyer;
-    }
+public class Sale implements Runnable{
 
     private Byyer byyer;
-    private Optional<Manufacturer> manufacture = null;
+    private Manufacture manufacture;
+    private Shop shop;
 
-
-    public int getProduct() {
-        return product;
+    public Sale(Byyer byyer, Manufacture manufacture, Shop shop) {
+        this.byyer = byyer;
+        this.manufacture = manufacture;
+        this.shop = shop;
     }
-
-    public void operation(int product) {
-        String name = Thread.currentThread().getName();
-        if (!manufacture.isEmpty()) {
-            product += product;
-        } else {
-            product -= product;
-        }
-    }
-
 
     @Override
     public void run() {
-        if(manufacture.isEmpty()) {
-            while(byyer.getProduct() < 5){
-                doOperation();
-            }
+        while (manufacture.getProduct() > 0 && byyer.getProduct() < 5){
+            doOperation();
         }
-        else{
-            while (manufacture.get().getProduct() > 0){
-                doOperation();
-            }
-        }
-
 
     }
 
+    public void manuf() {
+        if (manufacture.getProduct() > 3 && shop.getProduct() == 0) {
+            shop.setProduct(3);
+            manufacture.setProduct(manufacture.getProduct() - 3);
+        } else {
+            shop.setProduct(shop.getProduct() + manufacture.getProduct());
+            manufacture.setProduct(0);
+        }
+    }
+
+
+    public void buy() {
+        byyer.setProduct(byyer.getProduct() + shop.getProduct());
+        shop.setProduct(0);
+    }
 
     private synchronized void doOperation() {
-        if (getCount() >= product) {
 
 
-            if (!manufacture.isEmpty()) {
-                System.out.println("производитель произвел товар");
+            if (shop.getProduct() < 3 && manufacture.getProduct() != 0) {
+                manuf();
+                System.out.println("производитель доставил товар");
+                System.out.println("Теперь в магазине " + shop.getProduct() + " единиц(-ы) товара");
+                System.out.println("Теперь у производителя " + manufacture.getProduct() + " единиц(-ы) товара");
             } else {
-                System.out.println("покупатель купил товар");
+                buy();
+                System.out.println("покупатель купил весь товар в магазине");
+                System.out.println("у покупателя теперь " + byyer.getProduct() + " единиц(-ы) товара");
             }
-
 
             try {
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
-            operation(product);
-            System.out.println(" выполнил операцию. Теперь в порту кг груза: " + getCount());
-        } else {
-            System.out.println("Груз для разгрузки отсутствует. " + " пытается разгрузить: " + getCount());
-        }
     }
 }

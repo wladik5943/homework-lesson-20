@@ -1,6 +1,6 @@
 package Task3;
 
-public class Manufacturer {
+public class Manufacture {
     private int product = 5;
 
     public void setProduct(int product) {
